@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"log" 
 	"rexencorpstartup/User"
 	"rexencorpstartup/handler"
 
@@ -27,10 +27,8 @@ func main(){
 	api := router.Group("/api/v1")
 	
 	api.POST("/users", userHandler.RegisterUser)
+	api.POST("/sessions", userHandler.Login)
 
 	router.Run()
-	// user := user.User{
-	// 	Name: "Test Simpan",
-	// }
-	// userRepository.Save(user)
+
 }
