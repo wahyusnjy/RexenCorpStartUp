@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	user "rexencorpstartup/User"
+	"rexencorpstartup/auth"
 	"rexencorpstartup/helper"
 
 	"github.com/gin-gonic/gin"
@@ -11,17 +12,14 @@ import (
 
 type userHandler struct {
 	userService user.Service
+	authService auth.Service
 }
 
-func NewUserHandler(userService user.Service) *userHandler {
-	return &userHandler{userService}
+func NewUserHandler(userService user.Service, authService auth.Service) *userHandler {
+	return &userHandler{userService, authService}
 }
 
 func (h *userHandler) RegisterUser(c *gin.Context) {
-	//tangkap input dari user
-	//map input dari user ke struct RegisterInput
-	//struct diatas kita passing sebagai parameter service
-
 	var input user.RegisterUserInput
 
 	err := c.ShouldBindJSON(&input)
@@ -29,7 +27,7 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 		errors := helper.FormatValidationError(err)
 		errorMessage := gin.H{"errors": errors}
 
-		response := helper.APIResponse("Register Account Failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		response := helper.APIResponse("Register Account Failed1", http.StatusUnprocessableEntity, "error", errorMessage)
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
@@ -37,14 +35,18 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 	newUser, err := h.userService.RegisterUser(input)
 
 	if err != nil {
-		response := helper.APIResponse("Register Account Failed", http.StatusBadRequest, "error", nil)
+		response := helper.APIResponse("Register Account Failed2", http.StatusBadRequest, "error", nil)
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
-	// token, err :=h.jwtService.GenerateToken()
-
-	formatter := user.FormatUser(newUser, "tokentokentokentokentoken")
+	token, err := h.authService.GenerateToken(newUser.ID)
+	if err != nil {
+		response := helper.APIResponse("Register Account Failed3", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+	formatter := user.FormatUser(newUser, token)
 
 	response := helper.APIResponse("Account has been registered", http.StatusOK, "success", formatter)
 
@@ -52,13 +54,6 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 }
 
 func (h *userHandler) Login(c *gin.Context) {
-	//user memasukan input (email & password)
-	//input ditangkap dari handler
-	//mapping dari input user ke input struct
-	//input struct passing ke service
-	//di service mencari dg bantuan repository user dengan email x
-	//mencocokan password
-
 	var input user.LoginInput
 
 	err := c.ShouldBindJSON(&input)
@@ -81,8 +76,14 @@ func (h *userHandler) Login(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
+	token, err := h.authService.GenerateToken(loggedinUser.ID)
+	if err != nil {
+		response := helper.APIResponse("Login Failed", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
 
-	formatter := user.FormatUser(loggedinUser, "tokentokentoken")
+	formatter := user.FormatUser(loggedinUser, token)
 
 	response := helper.APIResponse("Successfuly login", http.StatusOK, "success", formatter)
 
@@ -91,11 +92,6 @@ func (h *userHandler) Login(c *gin.Context) {
 }
 
 func (h *userHandler) CheckEmailAvailability(c *gin.Context) {
-	//ada input email dari user
-	//input email di mapping ke struct input
-	//struct input di-passing ke service
-	//service akan manggil repository email sudah ada atau belum
-	// repository - db
 	var input user.CheckEmailInput
 
 	err := c.ShouldBindJSON(&input)
@@ -143,7 +139,7 @@ func (h *userHandler) UploadAvatar(c *gin.Context) {
 	//harusnya dapat dari JWT, Tapi sabar :)
 	userID := 1
 
-	path := fmt.Sprintf("images/%d-%s", userID, file.Filename)
+ 	path := fmt.Sprintf("images/%d-%s", userID, file.Filename)
 
 	err = c.SaveUploadedFile(file, path)
 	if err != nil {

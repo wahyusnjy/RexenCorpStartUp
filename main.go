@@ -1,8 +1,9 @@
 package main
 
 import (
-	"log" 
+	"log"
 	"rexencorpstartup/User"
+	"rexencorpstartup/auth"
 	"rexencorpstartup/handler"
 
 	"github.com/gin-gonic/gin"
@@ -20,8 +21,9 @@ func main(){
 
 	userRepository := user.NewRepository(db)
 	userService := user.NewService(userRepository)
+	authService := auth.NewService()
 
-	userHandler := handler.NewUserHandler(userService)
+	userHandler := handler.NewUserHandler(userService, authService)
 
 	router := gin.Default()
 	api := router.Group("/api/v1")
@@ -31,6 +33,6 @@ func main(){
 	api.POST("/email_checkers", userHandler.CheckEmailAvailability)
 	api.POST("/avatars", userHandler.UploadAvatar)
 
-	router.Run()
+	router.Run() 
 
 }
