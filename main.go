@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"rexencorpstartup/User"
 	"rexencorpstartup/auth"
+	"rexencorpstartup/campaign"
 	"rexencorpstartup/handler"
 	"rexencorpstartup/helper"
 	"strings"
@@ -24,6 +26,23 @@ func main(){
 	}
 
 	userRepository := user.NewRepository(db)
+	campaignRepository := campaign.NewRepository(db)
+
+	campaigns, err := campaignRepository.FindByUserID(1)	
+
+	fmt.Println("debug")
+	fmt.Println("debug")
+	fmt.Println("debug")
+	fmt.Println(len(campaigns))
+	for _, campaign := range campaigns {
+			fmt.Println(campaign.Name)
+			if len(campaign.CampaignImages) > 0 {
+			fmt.Println("Jumlah Gambar")
+			fmt.Println(len(campaign.CampaignImages))
+			fmt.Println(campaign.CampaignImages[0].FileName)
+			} 
+	}
+
 	userService := user.NewService(userRepository)
 	authService := auth.NewService()
 
