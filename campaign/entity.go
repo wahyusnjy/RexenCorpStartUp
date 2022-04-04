@@ -17,9 +17,9 @@ type Campaign struct {
 	CurrentAmount    int
 	Slug             string
 	CreatedAt        time.Time
-	UpdateAt         time.Time
-	CampaignImages 	 []CampaignImage
-	User 			 user.User
+	UpdatedAt        time.Time
+	CampaignImages   []CampaignImage
+	User             user.User
 }
 
 type CampaignImage struct {
