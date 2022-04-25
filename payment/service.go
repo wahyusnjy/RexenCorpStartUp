@@ -21,36 +21,30 @@ func NewService() *service{
 }
 
 func (s *service) GetPaymentURL(transaction Transaction, user user.User) (string, error) { 
-	// midtrans.ServerKey = ""
-	// midtrans.Environment = midtrans.Sandbox
-	
-	// s := snap.Client
-	// s.New("gblk", midtrans.Sandbox)
-	
-	
 	midclient := midtrans.NewClient()
-	midclient.ServerKey = "hehekampang"
-	midclient.ClientKey = "hehekampang"
+	midclient.ServerKey = ""
+	midclient.ClientKey = ""
 	midclient.APIEnvType = midtrans.Sandbox
 
 	snapGateway := midtrans.SnapGateway{
-		Client : midclient,
+		Client: midclient,
 	}
 
 	snapReq := &midtrans.SnapReq{
-		CustomerDetail : &midtrans.CustDetail{
+		CustomerDetail: &midtrans.CustDetail{
 			Email: user.Email,
 			FName: user.Name,
 		},
 		TransactionDetails: midtrans.TransactionDetails{
-			OrderID: strconv.Itoa(transaction.ID),
+			OrderID:  strconv.Itoa(transaction.ID),
 			GrossAmt: int64(transaction.Amount),
 		},
 	}
-	snapTokenResp, err := snapGateway.GetToken(snapReq)
-	if err != nil{
-		return "", err 
-	}
-	return snapTokenResp.RedirectURL, nil
 
+	snapTokenResp, err := snapGateway.GetToken(snapReq)
+	if err != nil {
+		return "", err
+	}
+
+	return snapTokenResp.RedirectURL, nil
 }

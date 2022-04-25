@@ -80,7 +80,22 @@ func (h *transactionHandler) CreateTransaction(c *gin.Context){
 	response := helper.APIResponse("Succes to Create Transactions", http.StatusOK, "success", transaction.FormatTransactions(newTransaction))
 	c.JSON(http.StatusOK, response)
 }
-//ada input dari user 
-//handler tangkap input terus di mapping ke input struct
-//panggil service buat transaksi, manggil sistem midtrans
-//panggil repository create new transaction data
+
+func (h *transactionHandler) GetNotification(c *gin.Context) {
+	var input transaction.TransactionNotificationInput
+
+	err := c.ShouldBindJSON(&input)
+
+	if err != nil {
+		response := helper.APIResponse("Failed to process notification1", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+	err = h.service.ProcessPayment(input)
+	if err != nil {
+		response := helper.APIResponse("Failed to process notification2", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+	c.JSON(http.StatusOK, input)
+}
