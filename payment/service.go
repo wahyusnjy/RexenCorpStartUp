@@ -21,11 +21,11 @@ func NewService() *service{
 }
 
 func (s *service) GetPaymentURL(transaction Transaction, user user.User) (string, error) { 
-	// midtrans.ServerKey = "SB-Mid-server--9J2O5Thy_62ue8K8I2vbZlc"
+	// midtrans.ServerKey = ""
 	// midtrans.Environment = midtrans.Sandbox
 	
 	// s := snap.Client
-	// s.New("SB-Mid-server--9J2O5Thy_62ue8K8I2vbZlc", midtrans.Sandbox)
+	// s.New("gblk", midtrans.Sandbox)
 	
 	
 	midclient := midtrans.NewClient()
